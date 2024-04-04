@@ -5,17 +5,23 @@ open Str
 let tokenize input = 
   let rec tok pos =
     if pos >= String.length input then []
-    else if (Str.string_match (Str.regexp "[ \n\t]") input pos) then 
+    else if (Str.string_match (Str.regexp "[ \n\t]+") input pos) then 
       tok (Str.match_end())
     else if (Str.string_match (Str.regexp "[0-9]+") input pos) then 
-        (Tok_Int (int_of_string(Str.matched_string input))) :: tok(Str.match_end()) (*fix negative integer*)
+      let num = int_of_string (Str.matched_string input) in
+      let next_pos = Str.match_end () in
+      (Tok_Int num) :: tok next_pos 
       else if (Str.string_match (Str.regexp "\"[^\"]*\"") input pos) then 
         let strng = Str.matched_string input in 
         (Tok_String(String.sub strng 1 (String.length strng - 2))) :: tok(Str.match_end())  
       else if Str.string_match (Str.regexp "true") input pos then
         (Tok_Bool true) :: tok (Str.match_end ())
     else if Str.string_match (Str.regexp "false") input pos then
-        (Tok_Bool false) :: tok (Str.match_end ())     
+        (Tok_Bool false) :: tok (Str.match_end ())   
+    else if Str.string_match(Str.regexp "&&") input pos then 
+        Tok_And :: tok(Str.match_end())
+    else if Str.string_match(Str.regexp "||") input pos then 
+        Tok_Or :: tok(Str.match_end())
     else if (Str.string_match (Str.regexp "[a-zA-Z][a-zA-Z0-9]*") input pos) then 
       let id = Str.matched_string input in
       let token = 
@@ -29,15 +35,15 @@ let tokenize input =
         | "then" -> Tok_Then
         | "else" -> Tok_Else
         | "not" -> Tok_Not
-        | "or" -> Tok_Or
-        | "and" -> Tok_And
         | _ -> Tok_ID id
       in
       token :: tok (Str.match_end())
     else if (Str.string_match (Str.regexp ";;") input pos) then 
-      Tok_DoubleSemi :: tok (Str.match_end ())
+      Tok_DoubleSemi :: tok (Str.match_end ()) 
     else if (Str.string_match (Str.regexp "->") input pos) then 
       Tok_Arrow :: tok (Str.match_end ())
+    else if (Str.string_match (Str.regexp ".") input pos) then 
+      Tok_Dot :: tok (Str.match_end ())
     else if (Str.string_match (Str.regexp ";") input pos) then 
       Tok_Semi :: tok (Str.match_end ())
     else if (Str.string_match (Str.regexp "=") input pos) then 

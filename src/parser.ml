@@ -12,7 +12,7 @@
           raise
             (InvalidInputException
               (Printf.sprintf "Expected %s from input %s, got %s"
-                  (string_of_token tok)
+                  (string_of_token tok) 
                   (string_of_list string_of_token toks)
                   (string_of_token h)))
 
@@ -38,7 +38,7 @@
       | Some Tok_Let -> parse_let tokens
       | Some Tok_If -> parse_if tokens
       | Some Tok_Fun -> parse_func tokens
-      | Some Tok_Int _ | Some Tok_Bool _ | Some Tok_String _ | Some Tok_ID _ | Some Tok_LParen  -> parse_or tokens
+      | Some Tok_Int _ | Some Tok_Bool _ | Some Tok_String _ | Some Tok_ID _ | Some Tok_LParen | Some Tok_LCurly | Some Tok_Not  -> parse_or tokens
       | _ -> raise (InvalidInputException "Unexpected or no token")
 
 
@@ -246,9 +246,9 @@
                 let tokens = match_token tokens Tok_Semi in
                 let (tokens, e1) = parse_record_body tokens in
                 (tokens, (Lab id, e) :: e1)
-              | _ -> raise (InvalidInputException "No Semi"))
+              | _ -> (tokens, [(Lab id, e)] ))
             | _ -> (tokens, [])
-            
+
 
     (* Part 3: Parsing mutop *)
 
