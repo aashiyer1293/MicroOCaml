@@ -248,15 +248,7 @@
                 (tokens, (Lab id, e) :: e1)
               | _ -> raise (InvalidInputException "No Semi"))
             | _ -> (tokens, [])
-
-
-
-      
-
-      
-      
-
-
+            
 
     (* Part 3: Parsing mutop *)
 
