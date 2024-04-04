@@ -11,6 +11,10 @@ let tokenize input =
       let num = int_of_string (Str.matched_string input) in
       let next_pos = Str.match_end () in
       (Tok_Int num) :: tok next_pos 
+    else if (Str.string_match (Str.regexp "-[0-9]+") input pos) then 
+      let num = int_of_string (Str.matched_string input) in
+      let next_pos = Str.match_end () in
+      (Tok_Int (num)) :: tok next_pos 
       else if (Str.string_match (Str.regexp "\"[^\"]*\"") input pos) then 
         let strng = Str.matched_string input in 
         (Tok_String(String.sub strng 1 (String.length strng - 2))) :: tok(Str.match_end())  
