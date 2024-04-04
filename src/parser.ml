@@ -252,4 +252,28 @@
 
     (* Part 3: Parsing mutop *)
 
-    let rec parse_mutop toks = failwith "unimplemented"
+    let rec parse_mutop tokens = 
+      match lookahead tokens with 
+      | Some Tok_Def -> parse_def tokens
+      | Some Tok_DoubleSemi -> ([], NoOp)
+      | _ -> parse_exp_mutop tokens
+    
+    and parse_def tokens = 
+      match lookahead tokens with 
+      | Some Tok_Def -> 
+        let tokens = match_token tokens Tok_Def in 
+        (match lookahead tokens with 
+        | Some Tok_ID id -> 
+          let tokens = match_token tokens (Tok_ID id) in 
+          let tokens = match_token tokens Tok_Equal in 
+          let (tokens, e) = parse_expr tokens in
+          let tokens = match_token tokens Tok_DoubleSemi in 
+          (tokens, Def(id,e))
+        | _ -> raise (InvalidInputException "No ID"))
+      | _ -> raise (InvalidInputException "No def")
+
+
+    and parse_exp_mutop tokens = 
+      let (tokens, e) = parse_expr tokens in 
+      let tokens = match_token tokens Tok_DoubleSemi in
+      (tokens, Expr e)

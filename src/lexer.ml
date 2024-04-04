@@ -76,6 +76,7 @@ let tokenize input =
       Tok_RParen :: tok (Str.match_end ())
     else if (Str.string_match (Str.regexp ".") input pos) then 
       Tok_Dot :: tok (Str.match_end ())
+    
     else 
       raise (InvalidInputException "Wrong language")
   in
