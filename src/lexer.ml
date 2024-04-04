@@ -9,9 +9,9 @@ let tokenize input =
       tok (Str.match_end())  
     else if (Str.string_match (Str.regexp "-?[0-9]+") input pos) then 
         (Tok_Int (int_of_string(Str.matched_string input))) :: tok(Str.match_end())
-    else if (Str.string_match (Str.regexp "\"[^\"]*\"") input pos) then 
-      let strng = Str.matched_string input in 
-      (Tok_String(String.sub input 1 (String.length input - 2))) :: tok(Str.match_end())
+      else if (Str.string_match (Str.regexp "\"[^\"]*\"") input pos) then 
+        let strng = Str.matched_string input in 
+        (Tok_String(String.sub strng 1 (String.length strng - 2))) :: tok(Str.match_end())      
     else if (Str.string_match (Str.regexp "true\\|false") input pos) then 
       (Tok_Bool (bool_of_string(Str.matched_string input))) :: tok(Str.match_end())
     else if (Str.string_match (Str.regexp "[a-zA-Z][a-zA-Z0-9]*") input pos) then 
