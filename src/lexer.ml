@@ -7,25 +7,34 @@ let tokenize input =
     if pos >= String.length input then []
     else if (Str.string_match (Str.regexp "[ \n\t]+") input pos) then 
       tok (Str.match_end())
+
     else if (Str.string_match (Str.regexp "[0-9]+") input pos) then 
       let num = int_of_string (Str.matched_string input) in
       let next_pos = Str.match_end () in
       (Tok_Int num) :: tok next_pos 
-    else if (Str.string_match (Str.regexp "-[0-9]+") input pos) then 
+
+    else if ( pos > 0 && Str.string_match (Str.regexp "-[0-9]+") input pos && 
+      (input.[pos-1] = ' ' || input.[pos-1] = '(')) then 
       let num = int_of_string (Str.matched_string input) in
       let next_pos = Str.match_end () in
       (Tok_Int (num)) :: tok next_pos 
+
       else if (Str.string_match (Str.regexp "\"[^\"]*\"") input pos) then 
         let strng = Str.matched_string input in 
-        (Tok_String(String.sub strng 1 (String.length strng - 2))) :: tok(Str.match_end())  
+        (Tok_String(String.sub strng 1 (String.length strng - 2))) :: tok(Str.match_end()) 
+
       else if Str.string_match (Str.regexp "true") input pos then
         (Tok_Bool true) :: tok (Str.match_end ())
+
     else if Str.string_match (Str.regexp "false") input pos then
         (Tok_Bool false) :: tok (Str.match_end ())   
+
     else if Str.string_match(Str.regexp "&&") input pos then 
         Tok_And :: tok(Str.match_end())
+
     else if Str.string_match(Str.regexp "||") input pos then 
         Tok_Or :: tok(Str.match_end())
+
     else if (Str.string_match (Str.regexp "[a-zA-Z][a-zA-Z0-9]*") input pos) then 
       let id = Str.matched_string input in
       let token = 
@@ -42,6 +51,7 @@ let tokenize input =
         | _ -> Tok_ID id
       in
       token :: tok (Str.match_end())
+
     else if (Str.string_match (Str.regexp ";;") input pos) then 
       Tok_DoubleSemi :: tok (Str.match_end ()) 
     else if (Str.string_match (Str.regexp "->") input pos) then 
