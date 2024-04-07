@@ -68,6 +68,11 @@ let rec eval_expr env e =
     else 
       let new_env = extend env name (eval_expr env exp1) in 
       eval_expr new_env exp2)
+  | Not b -> 
+    let not_res = eval_expr env b in 
+    (match not_res with 
+    | Bool b -> Bool (not b)
+    | _ -> raise (TypeError "we want a bool for this one"))
   | Fun (p, b) -> Closure(env, p, b)
   | App (exp1, exp2) -> 
     let clos = eval_expr env exp1 in 
@@ -89,7 +94,8 @@ let rec eval_expr env e =
     |false -> Bool false)
   | Int i -> Int i
   | String s -> String s
-  | _ -> failwith "Haven't implemented"
+  | _ -> failwith "What are you doing here"
+  
 
   and find_label label fields =
     (match fields with 
@@ -101,4 +107,15 @@ let rec eval_expr env e =
 (* Evaluates MicroCaml mutop directive [m] in environment [env],
    returning a possibly updated environment paired with
    a value option; throws an exception on error *)
-let eval_mutop env m = failwith "unimplemented"
+let eval_mutop env m = 
+  match m with 
+  | Def (e1, e2) -> 
+    let x = extend_tmp env e1 in 
+    let y = eval_expr x e2 in
+    update x e1 y;
+    (x, Some y)
+  | Expr e -> 
+    let x = eval_expr env e in
+    (env, Some x)
+  | NoOp -> 
+    (env, None)
