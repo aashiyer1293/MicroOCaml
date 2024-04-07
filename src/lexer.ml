@@ -1,5 +1,6 @@
 open Types
 open Str
+
 (* Part 1: Lexer - IMPLEMENT YOUR CODE BELOW *)
 
 let tokenize input = 
@@ -13,9 +14,10 @@ let tokenize input =
       let next_pos = Str.match_end () in
       (Tok_Int num) :: tok next_pos 
 
-    else if ( pos > 0 && Str.string_match (Str.regexp "-[0-9]+") input pos && 
-      (input.[pos-1] = ' ' || input.[pos-1] = '(')) then 
-      let num = int_of_string (Str.matched_string input) in
+      
+    else if (Str.string_match (Str.regexp "(-[0-9]+)") input pos) then
+      let num_var = Str.matched_string input in
+      let num = int_of_string (Str.string_after (Str.string_before num_var (String.length num_var - 1)) 1) in
       let next_pos = Str.match_end () in
       (Tok_Int (num)) :: tok next_pos 
 

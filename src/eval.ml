@@ -30,12 +30,8 @@ let rec eval_expr env e =
   match e with
   | ID var_name -> lookup env var_name
   | Binop (op, (e1), (e2)) ->
-    let eval_e1 = match e1 with
-    | Int _ | Bool _ | String _ -> e1
-    | _ -> eval_expr env e1 in
-  let eval_e2 = match e2 with
-    | Int _ | Bool _ | String _ -> e2
-    | _ -> eval_expr env e2 in
+    let eval_e1 = eval_expr env e1 in
+    let eval_e2 = eval_expr env e2 in
     (match (op, eval_e1, eval_e2) with 
     | (Add, Int i, Int j) -> Int (i + j)
     | (Sub, Int i, Int j) -> Int (i - j)
@@ -60,8 +56,8 @@ let rec eval_expr env e =
     | (_, _, _) -> raise (TypeError "Invalid type for operator"))
   | If (exp, ex_t, ex_f) ->
     (match eval_expr env exp with 
-    | Bool true -> Bool true
-    | Bool false -> Bool false
+    | Bool true -> eval_expr env ex_t
+    | Bool false -> eval_expr env ex_f
     | _ -> raise (TypeError "Expression don't work")) 
   | Let (name, is_rec, exp1, exp2) ->
     (if is_rec then 
@@ -72,7 +68,33 @@ let rec eval_expr env e =
     else 
       let new_env = extend env name (eval_expr env exp1) in 
       eval_expr new_env exp2)
+  | Fun (p, b) -> Closure(env, p, b)
+  | App (exp1, exp2) -> 
+    let clos = eval_expr env exp1 in 
+    let arg = eval_expr env exp2 in
+    (match clos with 
+    | Closure (clos_env, p, b) -> eval_expr (extend clos_env p arg) b 
+    | _ -> raise (TypeError "exp1 should be a closure"))
+  | Record fields -> 
+    let f = List.map (fun (Lab label, expr) -> (Lab label, eval_expr env expr)) fields in
+    Record f
+  | Select (Lab label, e) -> 
+    let expr = eval_expr env e in
+    (match expr with 
+    | Record fields -> find_label label fields
+    | _ -> raise (TypeError "not a record"))
+  | Bool t -> 
+    (match t with 
+    |true -> Bool true
+    |false -> Bool false)
+  | Int i -> Int i
+  | String s -> String s
   | _ -> failwith "Haven't implemented"
+
+  and find_label label fields =
+    (match fields with 
+    | [] -> raise (SelectError "error, select didn't work out for you")
+    | (Lab l, value) :: ys -> if l = label then value else find_label label ys)
 
 (* Part 2: Evaluating mutop directive *)
 
